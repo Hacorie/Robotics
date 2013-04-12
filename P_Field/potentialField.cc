@@ -1,0 +1,123 @@
+/*
+Programmer: NATHAN PERRY
+Description: This Program Takes Information from 6 IR Sensors
+    and calculates the Direction and Magnitude the robot
+    should be turning.
+Instructor: Li
+Due: 2/22/13
+Turnin Code: turnin cen robotics13 potentialField.cc
+*/
+
+#include <iostream>
+#include <cmath>
+#include <cstdio>
+#include <cmath>
+
+#define MAX_RANGE   10
+#define IR_SENSORS  6
+
+using namespace std;
+
+//stucture for a vector
+typedef struct
+{
+    float magnitude;
+    float direction;
+
+} Vector;
+
+//User defined functions that manipulate vectors
+void repulsive(double d, double D, int i);
+Vector vectorSum(Vector a, Vector b);
+
+//Degrees to rad and vice-versa
+double d2r(double d);
+double r2d(double r);
+
+//Global Vector Variables for easier manipulation
+Vector current, total;
+//IR Sensor locations in radians
+const double IR[IR_SENSORS] = {45, 30, -30,-45, -130, 130};
+
+int main(int argsc, char* argsv[])
+{
+
+    //Set up vector structure for total
+    total.magnitude = 0.0;
+    total.direction = 0.0;
+
+    double dist;
+    //loop over all sensors and sum all vectors
+    for(int i = 0; i < IR_SENSORS; i++)
+    {
+        cin >> dist; //input a value in cm
+        repulsive(dist, MAX_RANGE, i); //get the direction and mag
+        total = vectorSum(current, total); //add current to total vectors
+    }
+
+    if(total.direction > 0)
+        total.direction = -180 + total.direction;
+
+    //output statement with formatting
+    printf("The Robot should turn %4.2f degrees with a magnitude of %4.2f\n\n", total.direction, total.magnitude);
+
+    return 0;
+}
+
+//Repulsive function from slides
+void repulsive(double d, double D, int i)
+{
+    if(d < D)
+    {
+        current.direction =  IR[i];
+        current.magnitude = (D-d)/D;
+    }
+    else
+    {
+        current.direction = 0.0;
+        current.magnitude = 0.0;
+    }
+    return;
+}
+
+//Add Two Vectors
+Vector vectorSum(Vector curr, Vector tot)
+{
+    //Varibles for Polar to Cartesian Calculation
+    double currx, curry;
+    double totx, toty;
+    double sumx, sumy;
+
+    //Polar to Cartesian
+    currx = curr.magnitude * cos(d2r(curr.direction));
+    curry = curr.magnitude * sin(d2r(curr.direction));
+
+    //Polar to Cartesian
+    totx = tot.magnitude * cos(d2r(tot.direction));
+    toty = tot.magnitude * sin(d2r(tot.direction));
+
+    //Addition of Cartesian coordinates
+    sumx = currx + totx;
+    sumy = curry + toty;
+
+    //printf("x=%f/ty=%f\n", sumx, sumy);
+
+    //int x = curr.magnitude * sin(d2r(curr.direction)) + total.magnitude * sin(d2r(total.mag));
+    //int y = 1;
+
+    //Transform back into polar coordiantes and save as total
+    tot.magnitude = sqrt( (sumx * sumx) + (sumy * sumy));
+    tot.direction = r2d(atan(sumy/sumx));
+
+    return tot;
+}
+
+double d2r(double d)
+{
+    return (d * (M_PI/180));
+}
+
+double r2d(double r)
+{
+    return (r * (180/M_PI));
+}
