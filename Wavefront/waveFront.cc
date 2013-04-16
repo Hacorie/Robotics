@@ -9,6 +9,7 @@ Purpose: To program a Wavefront algorithm and as memory efficient as possible
 
 #include <iostream>
 #include <fstream>
+#include <cstdio>
 
 using namespace std;
 
@@ -38,7 +39,7 @@ int main(short argc,  char**argv)
     //array based queue
     node fringe[MAX_SIZE];
     char top = 0;
-    char rear = MAX_SIZE-1;
+    char rear = 0;
 
     //loop variables;
     char i,j;
@@ -60,9 +61,7 @@ int main(short argc,  char**argv)
             worldView[i][j].value -= '0';
             worldView[i][j].row = i;
             worldView[i][j].column = j;
-            //cout << world[i][j];
         }
-        //cout << endl;
     }
 
     //read in goal state
@@ -91,62 +90,105 @@ int main(short argc,  char**argv)
 
     while(num_ele != 0)
     {
-        cout << "Here" << endl;
         //expand top
         //check top ((row boundry and visited/wall))
         if(fringe[top].row-1 >= 0 && worldView[fringe[top].row-1][fringe[top].column].value == 0)
         {
             //update value in new location
             worldView[fringe[top].row-1][fringe[top].column].value = fringe[top].value + 1;
-            //push onto queue
-            fringe[(num_ele+1)%MAX_SIZE] = worldView[fringe[top].row-1][fringe[top].column];
+            //push onto queue; update number of items; update rear
+            fringe[(rear+1)%MAX_SIZE] = worldView[fringe[top].row-1][fringe[top].column];
             num_ele += 1;
+            rear = (rear+1)%MAX_SIZE;
         }
 
         //check left
         if(fringe[top].column-1 >= 0 && worldView[fringe[top].row][fringe[top].column-1].value == 0)
         {
             worldView[fringe[top].row][fringe[top].column-1].value = fringe[top].value + 1;
-            fringe[(num_ele+1)%MAX_SIZE] = worldView[fringe[top].row][fringe[top].column-1];
+            fringe[(rear+1)%MAX_SIZE] = worldView[fringe[top].row][fringe[top].column-1];
             num_ele += 1;
+            rear = (rear+1)%MAX_SIZE;
         }
 
         //check bottom
         if(fringe[top].row+1 < MAX_HEIGHT && worldView[fringe[top].row+1][fringe[top].column].value == 0)
         {
             worldView[fringe[top].row+1][fringe[top].column].value = fringe[top].value + 1;
-            fringe[(num_ele+1)%MAX_SIZE] = worldView[fringe[top].row+1][fringe[top].column];
+            fringe[(rear+1)%MAX_SIZE] = worldView[fringe[top].row+1][fringe[top].column];
             num_ele += 1;
+            rear = (rear+1)%MAX_SIZE;
         }
 
         //check right
         if(fringe[top].column+1 < MAX_WIDTH && worldView[fringe[top].row][fringe[top].column+1].value == 0)
         {
             worldView[fringe[top].row][fringe[top].column+1].value = fringe[top].value + 1;
-            fringe[(num_ele+1)%MAX_SIZE] = worldView[fringe[top].row][fringe[top].column+1];
+            fringe[(rear+1)%MAX_SIZE] = worldView[fringe[top].row][fringe[top].column+1];
             num_ele += 1;
+            rear = (rear+1)%MAX_SIZE;
         }
-
-    for(i = top; i <=num_ele; i++)
-    {
-        cout << short(fringe[i].row) << " " << short(fringe[i].column) << " " << short(fringe[i].value) << endl;
-    }
+        //update first ele and pop
         top = (top + 1) % MAX_SIZE;
         num_ele -= 1;
-    
+
+    }
+
+
+    printf("Start: [0,0]\nGoal: [%d,%d]\n", r,c);
+    printf("The Total Number of Steps: %d\n", worldView[0][0].value-2);
+    printf("\nThe Path is: [%d,%d]", 0, 0);
+
+    item = worldView[0][0].value;
+    //find Shortest Path
+    i = 0; j = 0;
+    while(i != r || j != c)
+    {
+        //check neighbors; take first shortest available
+        //check up
+        if(i-1 >= 0 && worldView[i-1][j].value != 1 && worldView[i-1][j].value < item)
+        {
+            item = worldView[i-1][j].value;
+            printf(" -> [%d,%d]", i-1, j);
+            i-=1;
+        }
+        //check left
+        else if(j-1 >= 0 && worldView[i][j-1].value != 1 && worldView[i][j-1].value < item)
+        {
+            item = worldView[i][j-1].value;
+            printf(" -> [%d,%d]", i, j-1);
+            j-=1;
+        }
+        //check down
+        else if(i+1 < MAX_HEIGHT && worldView[i+1][j].value != 1 && worldView[i+1][j].value < item)
+        {
+            item = worldView[i+1][j].value;
+            printf(" -> [%d,%d]", i+1, j);
+            i+=1;
+        }
+        //check right
+        else if(j+1 < MAX_WIDTH && worldView[i][j+1].value != 1 && worldView[i][j+1].value < item)
+        {
+            item = worldView[i][j+1].value;
+            printf(" -> [%d,%d]", i, j+1);
+            j+=1;
+        }
+        else
+        {
+            printf("Should never get here unless all surrounding tiles are the same value\n");
+            return -1;
+        }
+    }
+    printf("\n");
+
+    /*
+    //Print the World
     for(i = 0; i < MAX_HEIGHT; i++)
     {
         for(j = 0; j < MAX_WIDTH; j++)
-        {
-             cout << short(worldView[i][j].value) << " ";
-        }
-        cout << endl;
+            printf("%4d",  short(worldView[i][j].value));
+        printf("\n");
     }
-    cout << endl << endl;
-
-    }
-
-    //fringe[top] = NULL;
     return 0;
-
+    */
 }
