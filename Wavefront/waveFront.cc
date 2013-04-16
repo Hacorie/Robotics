@@ -72,6 +72,7 @@ int main(short argc,  char**argv)
     //Set up goal state value
     worldView[r][c].value = 2;
 
+    /*
     //make sure world looks right.
     for(i = 0; i < MAX_HEIGHT; i++)
     {
@@ -81,6 +82,7 @@ int main(short argc,  char**argv)
         }
         cout << endl;
     }
+    */
 
     //start waveFront algorithm here
 
@@ -181,7 +183,6 @@ int main(short argc,  char**argv)
     }
     printf("\n");
 
-    /*
     //Print the World
     for(i = 0; i < MAX_HEIGHT; i++)
     {
@@ -190,5 +191,4 @@ int main(short argc,  char**argv)
         printf("\n");
     }
     return 0;
-    */
 }
